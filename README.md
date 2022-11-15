@@ -1,5 +1,4 @@
 
-In this folder, there are a total of 3 codes.
 
 Algorithms1.cpp - the main program is to find potential paths.
 This program requires compilation it with C++11 or newer.
