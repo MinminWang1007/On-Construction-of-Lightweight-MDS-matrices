@@ -17,16 +17,22 @@ A  command will be:
         ./a.out.
 The MDS matrices with  8n+3 xor gates can be obtained.
 
-Algorithms3_1_path4.cpp - the main program is to find potential paths with the depth less 4 .
+Algorithms3_1_depth5.cpp - the main program is to find potential paths with the depth less 5 .
 This program requires compilation it with C++11 or newer.
 A  command will be:
-        g++ Algorithms3_1_path4.cpp 
+        g++ Algorithms3_1_depth5.cpp 
  and then
         ./a.out.
-The potential paths of depth less 4  can be obtained.
+The potential paths of depth less 5  can be obtained.
 
 
-
+Algorithms3_2_depth5.cpp - the main program is to find potential paths with the depth less 5 .
+This program requires compilation it with C++11 or newer.
+A  command will be:
+        g++ Algorithms3_2_depth5.cpp 
+ and then
+        ./a.out.
+The potential paths of depth less 5  can be obtained.
 
 
 Above codes also can be run by using visual studio 2017.
