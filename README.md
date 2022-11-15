@@ -32,7 +32,7 @@ A  command will be:
         g++ Algorithms3_2_depth5.cpp 
  and then
         ./a.out.
-The potential paths of depth less 5  can be obtained.
+The MDS matrices with  8n+3 and depth less 5  can be obtained.
 
 
 Above codes also can be run by using visual studio 2017.
