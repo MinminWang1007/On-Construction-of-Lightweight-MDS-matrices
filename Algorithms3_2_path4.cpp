@@ -1,24 +1,38 @@
-#pragma warning(disable:4996);
-#include <fstream>//ifstream���ļ���ofstreamд�ļ���fstream��д�ļ�
-#include <string>//�ı����󣬴����ȡ������
-
-#include <cstdlib>//����system("pause");
-
-
+#include <fstream>//ifstream读文件，ofstream写文件，fstream读写文件
+#include <string>//文本对象，储存读取的内容
+#include <cstdlib>//调用system("pause");
+#include<vector>
+#include<algorithm>
 #include <stdint.h>
 #include <cstring>
 #include <time.h>
-using namespace std;
 #include <iostream>
 #include "stdlib.h"
-#define X 5
+using namespace std;
 #define M 1024
-#define N 128
-#define Len 45//Ԫ�ؼ�����
-#define opera_num 9
-int Lpath[M][opera_num] = { 0 };
-
-
+#define N 64
+#define dim 4
+#define num_non_xor_zero 4
+#define path_leng 8
+int nn = 0;
+int Mult_finite_field[16][16] = {
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+0, 2, 4, 6, 8, 10, 12, 14, 3, 1, 7, 5, 11, 9, 15, 13,
+0, 3, 6, 5, 12, 15, 10, 9, 11, 8, 13, 14, 7, 4, 1, 2,
+0, 4, 8, 12, 3, 7, 11, 15, 6, 2, 14, 10, 5, 1, 13, 9,
+0, 5, 10, 15, 7, 2, 13, 8, 14, 11, 4, 1, 9, 12, 3, 6,
+0, 6, 12, 10, 11, 13, 7, 1, 5, 3, 9, 15, 14, 8, 2, 4,
+0, 7, 14, 9, 15, 8, 1, 6, 13, 10, 3, 4, 2, 5, 12, 11,
+0, 8, 3, 11, 6, 14, 5, 13, 12, 4, 15, 7, 10, 2, 9, 1,
+0, 9, 1, 8, 2, 11, 3, 10, 4, 13, 5, 12, 6, 15, 7, 14,
+0, 10, 7, 13, 14, 4, 9, 3, 15, 5, 8, 2, 1, 11, 6, 12,
+0, 11, 5, 14, 10, 1, 15, 4, 7, 12, 2, 9, 13, 6, 8, 3,
+0, 12, 11, 7, 5, 9, 14, 2, 10, 6, 1, 13, 15, 3, 4, 8,
+0, 13, 9, 4, 1, 12, 8, 5, 2, 15, 11, 6, 3, 14, 10, 7,
+0, 14, 15, 1, 13, 3, 2, 12, 9, 7, 6, 8, 4, 10, 11, 5,
+0, 15, 13, 2, 9, 6, 4, 11, 1, 14, 12, 3, 8, 7, 5, 10,
+};
 int copy_type[48][3] = {
 	0,0,0,
 	1,1,0,
@@ -69,17 +83,6 @@ int copy_type[48][3] = {
 	46,2,11,
 	47,3,11,
 };
-void Printfpath(int leng[opera_num]);
-void printfpluspath(int path[opera_num], int location[X], int b[opera_num]);
-int MDS(int Matrix_A[4][4][N]);
-int Integer_power(int num);
-int Pluspath(int path[opera_num], int location[X], int b[opera_num]);
-void MP(int A[4][4][N]);
-void copyer(int Matrix[4][4][N], int alpha, int copy_number, int bi, int Register_Matrix[20][4][N], int Alpha_Matrix[20][4][N]);
-void diager(int Matrix[4][4][N], int alpha, int number);
-void multoper(int alpha_1[N], int alpha_2[N], int alpha_3[N]);
-void addoper(int alpha_1[N], int alpha_2[N], int alpha_3[N]);
-void copyshuzu(int path[opera_num], int location[X], int wh[opera_num]);
 int path[18][8] = {
 {	14	,	1	,	16	,	22	,	27	,	31	,	33	,	40	},
 {	14	,	1	,	16	,	23	,	25	,	30	,	35	,	36	},
@@ -102,321 +105,696 @@ int path[18][8] = {
 
 
 };
+
+void equal(int  Matrix_A[M][4][4], int count);
+int array_num[8][num_non_xor_zero] = { 2,2,2,2,2,9,2,9,2,2,9,9,9,2,2,9,2,9,9,9,2,9,9,9 };
+int element_finite(int element[N], int array_element[num_non_xor_zero]);
+int path_position[M][4][4][N] = { 0 };
+int MDS_matrix[M][4][4] = { 0 };
+int find_the_path_with_position(int leng[], int count, vector <vector<int> >vector_array[2]);
+void Generate_matrix(int leng[], int count, int register_set[], int Temp_Matrix[4][4][N], int h[12]);
+void combine1(int count, int  num, vector <vector<int> >vector_array[2]);
+void Comb(int index, int begin, int len, int nm, int *A, int *C, vector <vector<int> >vector_array[2]);
+void Initialization(int Matrix_A[4][4][N]);
+int MDS(int Matrix_A[4][4][N]);
+int Integer_power(int num);
+void copyer(int Matrix[4][4][N], int alpha, int copy_number, int Register_Matrix[12][4][N]);
+void diager(int Matrix[4][4][N], int alpha[4]);
+void multoper(int alpha_1[N], int alpha_2[N], int alpha_3[N]);
+void addoper(int alpha_1[N], int alpha_2[N], int alpha_3[N]);
+void Printfmatrix(int  Matrix_A[4][4][N]);
+int Generate_U(int leng[], int element_set[], int U_k[][8]);
+int gen_vector(int vector[], int  temp[]);
+int Judge_MDS(int Matrix[4][4]);
+int equal_two_row_matrix(int matrix_a[4][4], int matrix_b[4][4]);
+void finitefiledelement(int finite[44], int array[3]);
+void equal_element(int  Matrix_A[M][4][4][N], int count);
+void Generate_matrix_finite_field(int leng[], int count, int Temp_Matrix_finite_field[4][4], int element_set_finite_field[], int h[]);
+int equal_two_matrix_element(int matrix_a[4][4][N], int matrix_b[4][4][N]);
+int equal_two_matrix(int matrix_a[4][4], int matrix_b[4][4]);
+int path_depth(int leng[8], int element_set[44], int h[12]);
 int main()
 {
-	FILE* fp = fopen("new.txt", "r");
-	FILE* fp1 = fopen("pluspath(n=5��10-50).txt", "a");
-	int n1 = 435;
-	for (int k = 0; k < n1; k++)
+	vector <vector<int> >vector_array[2];
+	int count = 8;
+	combine1(44, num_non_xor_zero, vector_array);
+	for (int i = 1; i < 2; i++)
 	{
-		for (int i = 0; i < opera_num; i++)
-		{
-			fscanf_s(fp, "%2d", &Lpath[k][i]);
-		}
+		find_the_path_with_position(path[i], 8, vector_array);
+
 	}
-	for (int K = 10; K < 50; K++)
-	{
-		for (int l0 = 0; l0 < Len; l0++)
+
+	equal_element(path_position, nn);
+	//cout << nn << endl;
+
+
+
+	int kk = 0;
+	for (int k = 0; k < 8; k++) {
+		for (int s = 0; s < nn; s++)
 		{
-			for (int l1 = l0 + 1; l1 < Len; l1++)
+			int temp_matrix_element_finite[4][4] = { 0 };
+			for (int i = 0; i < 4; i++)
 			{
-				for (int l2 = l1 + 1; l2 < Len; l2++)
+				for (int j = 0; j < 4; j++)
 				{
-					for (int l3 = l2 + 1; l3 < Len; l3++)
-					{
-						for (int l4 = l3 + 1; l4 < Len; l4++)
-						{
-							int b[opera_num] = { 0 }, b1[opera_num] = { 1,1,1,1,1,1,1,1,1 };
-							int location[5] = { l0,l1,l2,l3,l4 };
-							copyshuzu(Lpath[K], location, b1);
-							for (b[0] = 0; b[0] < b1[0]; b[0]++)
-							{
-								for (b[1] = 0; b[1] < b1[1]; b[1]++)
-								{
-									for (b[2] = 0; b[2] < b1[2]; b[2]++)
-									{
-										for (b[3] = 0; b[3] < b1[3]; b[3]++)
-										{
-											for (b[4] = 0; b[4] < b1[4]; b[4]++)
-											{
-												for (b[5] = 0; b[5] < b1[5]; b[5]++)
-												{
-													for (b[6] = 0; b[6] < b1[6]; b[6]++)
-													{
-														for (b[7] = 0; b[7] < b1[7]; b[7]++)
-														{
-															for (b[8] = 0; b[8] < b1[8]; b[8]++)
-															{
-																int SS = Pluspath(Lpath[K], location, b);
-																if (SS == 1)
-																{
-																	//printfpluspath(Lpath[K], location, b);
-																	for (int i = 0; i < opera_num; i++)
-																	{
-																		fprintf(fp1, "%d ", Lpath[K][i]);
-																	}
-																	for (int i = 0; i < opera_num; i++)
-																	{
-																		fprintf(fp1, "%d ", b[i]);
-																	}
-																	for (int i = 0; i < X; i++)
-																	{
-																		fprintf(fp1, "%d ", location[i]);
-																	}
-																	fprintf(fp1, "\n ");
-																}
-															}
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
+
+					temp_matrix_element_finite[i][j] = element_finite(path_position[s][i][j], array_num[k]);
 				}
+
+
 			}
+			if (Judge_MDS(temp_matrix_element_finite) == 1)
+			{
+				for (int i = 0; i < 4; i++)
+				{
+					for (int j = 0; j < 4; j++)
+					{
+
+						MDS_matrix[kk][i][j] = temp_matrix_element_finite[i][j];
+						//cout << MDS_matrix[kk][i][j] << ", ";
+					}
+
+
+				}
+				//cout << endl;
+				kk++;
+			}
+
 		}
 	}
-	fclose(fp);
-	//cout << "time used: " << (double)(end - begin) / CLOCKS_PER_SEC << endl;
-}
-void printfpluspath(int path[opera_num], int location[X], int b[opera_num])
-{
-	for (int i = 0; i < opera_num; i++)
-	{
-		printf("%3d", path[i]);
-	}
-	for (int i = 0; i < opera_num; i++)
-	{
-		printf("%3d", b[i]);
-	}
-	for (int i = 0; i < X; i++)
-	{
-		printf("%3d", location[i]);
-	}
-	printf("\n");
+
+	cout << equal_two_matrix(MDS_matrix[0], MDS_matrix[4]);
+
+	equal(MDS_matrix, kk);
+
+	//cout << kk << endl;
+	//int h[12] = { 0,0,0,0,0,0,0,0,0,1,0,0 };
+	////
+	////int U_k[32][8] = { 0 };
+	//////////int array[3] = { 0,0,0 };
+	//int element_set_finite_field[44] = { 0 };
+
+	//////////for (int i = 0; i < 44; i++)
+	//////////{
+	//////////	element_set_finite_field[i] = 0;
+	//////////}
+	//int Temp_Matrix[4][4][N] = { 0 };
+	//element_set_finite_field[15] = 1;
+	//element_set_finite_field[18] = 2;
+	//element_set_finite_field[32] = 3;
+	//Generate_matrix(path[0], 8,  element_set_finite_field,  Temp_Matrix,  h);
+	//if (MDS(Temp_Matrix) == 1)
+	//{
+	//	//cout << i << endl;
+
+	//	Printfmatrix(Temp_Matrix);
+	//	
+	//}
+	//int array[3] = { 2,9,9 };
+	//int a[4][4] = { 0 };
+	//for (int i = 0; i < 4; i++)
+	//{
+	//	for (int j = 0; j < 4; j++)
+	//	{
+
+	//		a[i][j] = element_finite(Temp_Matrix[i][j], array);
+	//		cout << a[i][j] << " ";
+	//	}
+	//	cout <<  endl;
+
+	//}
+	//cout << Judge_MDS(a) << endl;
+
+
+	//Generate_U(path[0], element_set_finite_field, U_k);
+	//Generate_matrix_finite_field(path[0], 8, Temp_Matrix, element_set_finite_field, h);
 }
 
-int Pluspath(int path[opera_num], int location[X], int b[opera_num])
+
+
+
+
+
+
+int find_the_path_with_position(int leng[], int count, vector <vector<int> >vector_array[2])
 {
-	int diag[opera_num][4] = {}, coffcopy[opera_num] = {}, num = 1;
-	int Temp_Matrix[4][4][N] = { 0 }, Alpha_Matrix[20][4][N] = { 0 }, Register_Matrix[20][4][N] = { 0 };
-	Alpha_Matrix[0][0][0] = Register_Matrix[0][0][0] = Temp_Matrix[0][0][0] = 1;
-	Alpha_Matrix[1][1][0] = Register_Matrix[1][1][0] = Temp_Matrix[1][1][0] = 1;
-	Alpha_Matrix[2][2][0] = Register_Matrix[2][2][0] = Temp_Matrix[2][2][0] = 1;
-	Alpha_Matrix[3][3][0] = Register_Matrix[3][3][0] = Temp_Matrix[3][3][0] = 1;
-	for (int i = 0; i < opera_num; i++)
+	for (int i = 0; i < 8; i++)
 	{
-		coffcopy[i] = 1;
-		for (int j = 0; j < 4; j++)
-		{
-			diag[i][j] = 1;
-		}
+		cout << leng[i] << ", ";
 	}
-	for (int i = 0; i < X; i++)
+	cout << endl;
+
+	//cout << vector_array[1].size()<< endl;
+	for (int i = 0; i < 100000; i++)
 	{
-		if (location[i] % 5 == 0)
+
+		//cout << i << endl;
+		int element_set[44] = { 0 };
+		for (int j = 0; j < 44; j++)
 		{
-			coffcopy[location[i] / 5] = Integer_power(num);
-			num++;
+			element_set[j] = vector_array[0][i][j];
+
+		}
+		int U_k[32][8] = { 0 };
+		int num_array = Generate_U(leng, element_set, U_k);
+		//int h[12] = { 0,0,0,0,0,0,0,0,0,1,0,0 };
+
+
+
+
+
+
+		for (int numb = 0; numb < num_array; numb++)
+		{
+
+			int Temp_Matrix[4][4][N] = { 0 };
+			int h[12] = { 0 };
+
+			for (int i = 4; i < 12; i++)
+			{
+				h[i] = U_k[numb][i - 3];
+			}
+			if (path_depth(leng, element_set, h) < 5)
+			{
+				Generate_matrix(leng, count, element_set, Temp_Matrix, h);
+
+				if (MDS(Temp_Matrix) == 1)
+				{
+					//cout << i << endl;
+
+					Printfmatrix(Temp_Matrix);
+					for (int l = 0; l < 4; l++)
+					{
+						for (int j = 0; j < 4; j++)
+						{
+							for (int k = 0; k < N; k++)
+							{
+								if (Temp_Matrix[l][j][k] == 0)
+								{
+
+									break;
+								}
+
+								path_position[nn][l][j][k] = Temp_Matrix[l][j][k];
+
+
+							}
+
+						}
+
+
+					}
+					nn++;
+
+
+
+				}
+
+			}
+		}
+
+	}
+
+
+	return 0;
+
+
+
+
+}
+
+int path_depth(int leng[8], int element_set[44], int h[12])
+{
+	int hh[12];
+	for (int i = 0; i < 11; i++)
+	{
+		hh[i] = h[i - 1];
+
+	}
+
+
+	int depth[4] = { 0 };
+	int cadidate[4] = { 0,1,2,3 };
+	int Register[13][8] = { 0 };
+	int r = 4;
+	int num = 4;
+	int t[12] = { 0 };
+	for (int i = 0; i < 8; i++)
+	{
+
+
+
+
+		for (int s = 0; s < 4; s++)
+		{
+			if (element_set[num + s] > 0)
+			{
+				t[cadidate[s]]++;
+				depth[s] = depth[s] + 1;
+				Register[cadidate[s]][t[cadidate[s]]] = depth[s];
+			}
+
+		}
+
+		num = num + 4;
+
+
+		if (element_set[num] == 0)
+		{
+			if (depth[copy_type[leng[i]][1]] >= Register[copy_type[leng[i]][2]][hh[r]])
+			{
+				depth[copy_type[leng[i]][1]] = depth[copy_type[leng[i]][1]] + 1;
+				Register[r][0] = depth[copy_type[leng[i]][1]];
+			}
+			else
+			{
+				depth[copy_type[leng[i]][1]] = Register[copy_type[leng[i]][2]][hh[r]] + 1;
+				Register[r][0] = depth[copy_type[leng[i]][1]];
+			}
+
+
+
 		}
 		else
 		{
-			int di = location[i] / 5;//D_i
-			int dj = location[i] % 5 - 1;//D_i^j
-			diag[di][dj] = Integer_power(num);
-			num++;
+			if (depth[copy_type[leng[i]][1]] >= 1 + Register[copy_type[leng[i]][2]][hh[r]])
+			{
+				depth[copy_type[leng[i]][1]] = depth[copy_type[leng[i]][1]] + 1;
+				Register[r][0] = depth[copy_type[leng[i]][1]];
+			}
+			else
+			{
+				depth[copy_type[leng[i]][1]] = Register[copy_type[leng[i]][2]][hh[r]] + 2;
+				Register[r][0] = depth[copy_type[leng[i]][1]];
+
+			}
+		}
+
+
+		cadidate[copy_type[leng[i]][1]] = r;
+		r++;
+		num++;
+
+
+
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		//	cout << depth[i] << endl;
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		if (depth[3] < depth[i])
+		{
+			depth[3] = depth[i];
 		}
 	}
-	int r = 4;
-	for (int i = 0; i < opera_num; i++)
+
+
+
+
+	return depth[3];
+}
+void Generate_matrix(int leng[], int count, int element_set[], int Temp_Matrix[4][4][N], int h[12])
+{
+
+
+
+	Initialization(Temp_Matrix);
+
+	int Register_Matrix[4][12][4][N] = { 0 };
+	Register_Matrix[0][0][0][0] = 1;
+	Register_Matrix[0][1][1][0] = 1;
+	Register_Matrix[0][2][2][0] = 1;
+	Register_Matrix[0][3][3][0] = 1;
+	int r = 3;
+	int num = 4;
+	int t[12] = { 0 };
+
+	int cadidate[4] = { 0,1,2,3 };
+
+	//cout << "  dd" << endl;
+	for (int i = 0; i < 8; i++)
 	{
-		copyer(Temp_Matrix, coffcopy[i], path[i], b[i], Register_Matrix, Alpha_Matrix);
-		//MP(Temp_Matrix);
+		int temp_D[4] = { element_set[num],element_set[num + 1],element_set[num + 2],element_set[num + 3] };
+		diager(Temp_Matrix, temp_D);
+		for (int s = 0; s < 4; s++)
+		{
+			if (element_set[num + s] > 0)
+			{
+				t[cadidate[s]]++;
+				for (int j = 0; j < 4; j++)
+				{
+					int temp[N] = { Integer_power(element_set[num + s]) };
+					multoper(Temp_Matrix[s][j], temp, Register_Matrix[t[cadidate[s]]][cadidate[s]][j]);
+
+				}
+
+			}
+
+		}
+		num = num + 4;
+		copyer(Temp_Matrix, element_set[num], leng[i], Register_Matrix[h[r]]);
+		r++;
+		num++;
 		for (int j = 0; j < 4; j++)
 		{
 			for (int k = 0; k < N; k++)
 			{
-				Alpha_Matrix[r][j][k] = Register_Matrix[r][j][k] = Temp_Matrix[copy_type[path[i]][1]][j][k];
+				if (Temp_Matrix[copy_type[leng[i]][1]][j][k] == 0)break;
+				Register_Matrix[0][r][j][k] = Temp_Matrix[copy_type[leng[i]][1]][j][k];
 			}
 		}
-		r++;
-		for (int d = 0; d < 4; d++)
+		cadidate[copy_type[leng[i]][1]] = r;
+
+	}
+
+
+
+
+}
+int Generate_U(int leng[], int element_set[], int U_k[][8])
+{
+	int r = 3;
+	int num = 4;
+	int t[12] = { 0 };
+	int cadidate[4] = { 0,1,2,3 };
+	for (int i = 0; i < 8; i++)
+	{
+		int temp_D[4] = { element_set[num],element_set[num + 1],element_set[num + 2],element_set[num + 3] };
+		for (int s = 0; s < 4; s++)
 		{
-			if (diag[i][d] > 1)
+			if (element_set[num + s] > 0)
 			{
-				int r1 = 0;
-				for (int z1 = 0; z1 < r; z1++)
-				{
-					int t1 = 0;
-					for (int z2 = 0; z2 < 4; z2++)
-					{
-						int t2 = 0;
-						for (int k = 0; k < 4; k++)
-						{
-							if (Temp_Matrix[d][z2][k] == Register_Matrix[z1][z2][k])
-							{
-								t2++;
-							}
-						}
-						if (t2 < 4) break;
-						else
-						{
-							t1++;
-						}
-					}
-					if (t1 == 4)
-					{
-						r1 = z1;
-						break;
-					}
-				}
-				diager(Temp_Matrix, diag[i][d], d);
-				//MP(Temp_Matrix);
-				for (int j = 0; j < 4; j++)
-				{
-					for (int k = 0; k < N; k++)
-					{
-						Alpha_Matrix[r1][j][k] = Temp_Matrix[d][j][k];
-					}
-				}
+				t[cadidate[s]]++;
+
 			}
+
 		}
+		num = num + 4;
+		r++;
+		num++;
+		cadidate[copy_type[leng[i]][1]] = r;
+
 	}
-	int ss = MDS(Temp_Matrix);
-	//MP(Temp_Matrix);
-	/*if (ss == 1)
+	int vector[8] = { 0 };
+	for (int i = 0; i < 8; i++)
 	{
-		MP(Temp_Matrix);
-	}*/
-	return ss;
-}
-void Printfpath(int leng[opera_num])
-{
-	for (int j = 0; j < opera_num; j++)
-	{
-		cout << leng[j] << " ";
+		vector[i] = t[copy_type[leng[i]][2]];
 	}
-	cout << endl;
-}
-void copyer(int Matrix[4][4][N], int alpha, int copy_number, int bi, int Register_Matrix[20][4][N], int Alpha_Matrix[20][4][N])
-{
-	int temp1[4][N] = { 0 };
-	int temp[N] = { alpha };
-	for (int i = 0; i < 4; i++)
+
+
+
+	int a = 1;
+	int temp[8] = { 0 };
+	int count = 0;
+	while (a)
 	{
-		if (bi == 0)
+
+		for (int i = 0; i < 8; i++)
 		{
-			multoper(temp, Register_Matrix[copy_type[copy_number][2]][i], temp1[i]);
+
+			U_k[count][i] = temp[i];
+			//cout << temp[i] << " ";
 		}
-		else
-		{
-			multoper(temp, Alpha_Matrix[copy_type[copy_number][2]][i], temp1[i]);
-		}
-		addoper(Matrix[copy_type[copy_number][1]][i], temp1[i], Matrix[copy_type[copy_number][1]][i]);
+
+		//cout << endl;
+		a = a ^ gen_vector(vector, temp);
+
+		count++;
+
 	}
+
+
+	return count;
 }
-void diager(int Matrix[4][4][N], int alpha, int number)
-{
-	int temp1[4][N] = { 0 };
-	int temp[N] = { alpha };
-	for (int j = 0; j < 4; j++)
-	{
-		multoper(temp, Matrix[number][j], Matrix[number][j]);
-	}
-	//MP(Matrix);
-}
-int Integer_power(int num)
-{
-	int s = 1;
-	for (int i = 0; i < num; i++)
-	{
-		s = s * 2;
-	}
-	return s;
-}
-void multoper(int alpha_1[N], int alpha_2[N], int alpha_3[N])
+
+
+
+int gen_vector(int vector[8], int  temp[8])
 {
 
-	int t1 = 0;
-	int t2 = 0;
-	for (int i = 0; i < N; i++)
+
+	for (int i = 0; i < 8; i++)
 	{
-		if (alpha_1[i] > 0)
+		if (temp[i] < vector[i])
 		{
-			t1 = t1 + 1;
-		}
-		if (alpha_2[i] > 0)
-		{
-			t2 = t2 + 1;
-		}
-	}
-	int d[N] = { 0 };
-	int temp[N] = { 0 };
-	int t = 0;
-	for (int i = 0; i < t1; i++)
-	{
-		for (int j = 0; j < t2; j++)
-		{
-			t = alpha_1[i] | alpha_2[j];
-			d[t] = d[t] ^ 1;
-
-		}
-	}
-
-	t = 0;
-	for (int i = N; i >= 0; i--)
-	{
-		if (d[i] == 1)
-		{
-
-			temp[t] = i;
-			t = t + 1;
-
-		}
-	}
-
-	for (int i = 0; i < N; i++)
-	{
-		alpha_3[i] = temp[i];
-	}
-}
-void addoper(int alpha_1[N], int alpha_2[N], int alpha_3[N])
-{
-
-	int c[N] = { 0 };
-	int t1 = 0;
-	int t2 = 0;
-	int t = 0;
-	for (int i = 0; i < N; i++)
-	{
-		if (alpha_1[t1] > alpha_2[t2])
-		{
-			c[t] = alpha_1[t1];
-			t1 = t1 + 1;
-			t = t + 1;
-		}
-		else if (alpha_1[t1] < alpha_2[t2])
-		{
-			c[t] = alpha_2[t2];
-			t2 = t2 + 1;
-			t = t + 1;
+			temp[i]++;
+			return 0;
 		}
 		else {
-			t1 = t1 + 1;
-			t2 = t2 + 1;
+
+			for (int k = 0; k < 8 - i; k++)
+			{
+				if (temp[k] < vector[k])
+				{
+					temp[k]++;
+
+
+					for (int j = 0; j < k; j++)
+					{
+						temp[j] = 0;
+					}
+					return 0;
+				}
+			}
+		}
+	}
+	return 1;
+
+}
+int element_finite(int element[N], int array_element[3])
+{
+	int temp = 0;
+
+	for (int i = 0; i < N; i++)
+	{
+		int tem = 1, c = 0;
+		if (element[i] == 0)
+		{
+			return temp;
+		}
+
+		for (int j = 1; j < 4; j++)
+		{
+			c = (element[i] >> j) & 1;
+			//cout << c << " ";
+			if (c == 0)
+			{
+				tem = tem;
+			}
+			else
+			{
+
+				tem = Mult_finite_field[tem][array_element[j - 1]];
+
+
+			}
+
+
+		}
+
+		temp = temp ^ tem;
+	}
+	return 0;
+}
+
+
+
+
+int Judge_MDS(int Matrix[4][4])
+{
+	int hh[36][4] = {
+	0,1,0,1,0,1,0,2,0,1,0,3,0,1,1,2,0,1,1,3,0,1,2,3,
+	0,2,0,1,0,2,0,2,0,2,0,3,0,2,1,2,0,2,1,3,0,2,2,3,
+	0,3,0,1,0,3,0,2,0,3,0,3,0,3,1,2,0,3,1,3,0,3,2,3,
+	1,2,0,1,1,2,0,2,1,2,0,3,1,2,1,2,1,2,1,3,1,2,2,3,
+	1,3,0,1,1,3,0,2,1,3,0,3,1,3,1,2,1,3,1,3,1,3,2,3,
+	2,3,0,1,2,3,0,2,2,3,0,3,2,3,1,2,2,3,1,3,2,3,2,3
+	};
+	int hg[4][3] = {
+		0, 1, 2, 0, 1, 3, 0, 2, 3, 1, 2, 3 };
+	int c, d, e, m;
+	int g[68] = { 0 };
+	int a[3][3];
+	int b[3];
+	for (int i = 0; i < 36; i++)
+	{
+		c = Matrix[hh[i][0]][hh[i][2]];
+		d = Matrix[hh[i][1]][hh[i][3]];
+		e = Matrix[hh[i][1]][hh[i][2]];
+		m = Matrix[hh[i][0]][hh[i][3]];
+		g[i] = Mult_finite_field[c][d] ^ Mult_finite_field[e][m];
+
+		if (g[i] == 0)
+		{
+			return 0;
+		}
+	}
+	for (int i = 0; i < 4; i++)
+	{
+
+		for (int j = 0; j < 4; j++)
+		{
+
+			for (int k = 0; k < 3; k++)
+			{
+				for (int l = 0; l < 3; l++)
+
+				{
+					a[k][l] = Matrix[hg[i][k]][hg[j][l]];
+
+				}
+
+			}
+
+			b[0] = Mult_finite_field[a[1][1]][a[2][2]] ^ Mult_finite_field[a[1][2]][a[2][1]];
+			b[1] = Mult_finite_field[a[1][0]][a[2][2]] ^ Mult_finite_field[a[1][2]][a[2][0]];
+			b[2] = Mult_finite_field[a[1][1]][a[2][0]] ^ Mult_finite_field[a[1][0]][a[2][1]];
+
+
+
+			g[36 + 4 * i + j] = Mult_finite_field[b[0]][a[0][0]] ^ Mult_finite_field[a[0][1]][b[1]] ^ Mult_finite_field[a[0][2]][b[2]];
+			if (g[36 + 4 * i + j] == 0)
+			{
+				return 0;
+			}
 		}
 
 
 	}
-	for (int i = 0; i < N; i++)
+
+	for (int i = 0; i < 4; i++)
 	{
-		alpha_3[i] = c[i];
+		for (int j = 0; j < 4; j++)
+		{
+
+			g[52 + 4 * i + j] = Matrix[i][j];
+			if (g[52 + 4 * i + j] == 0)
+			{
+				return 0;
+			}
+		}
 	}
 
+
+	return  1;
+
+
+}
+
+void finitefiledelement(int finite[44], int array[3])
+{
+	int temp[44] = { 0 };
+	int count = 0;
+	int temp_count = 0;
+	for (int i = 0; i < 44; i++)
+	{
+
+		if (finite[i] == 0)
+		{
+			temp[count] = 1;
+		}
+		else {
+			temp[count] = array[temp_count];
+			temp_count++;
+		}
+		count++;
+	}
+	for (int i = 0; i < 44; i++)
+	{
+		finite[i] = temp[i];
+	}
+}
+
+
+
+
+
+
+
+
+void combine1(int count, int  num, vector <vector<int> >vector_array[2])
+{
+
+	int A[20] = { 0 };
+	for (int i = 1; i < count; i++)
+	{
+		A[i] = i;
+		//cout << A[i];
+	}
+	int len = count, nm = num;
+	int *C = new int[nm + 1];
+	Comb(0, 0, len, nm, A, C, vector_array);
+
+	for (int i = 0; i < vector_array[1].size(); i++)
+	{
+		vector<int>v_array;
+		int AA[M] = { 0 };
+		int t = 1;
+		for (int j = 0; j < num; j++)
+		{
+			AA[vector_array[1][i][j]] = t;
+
+			t++;
+		}
+		for (int j = 0; j < count; j++)
+		{
+
+			v_array.push_back(AA[j]);
+		}
+		vector_array[0].push_back(v_array);
+
+	}
+
+
+	//for (int i = 0; i < vector_array[1].size(); i++)
+	//{
+
+
+	//	for (int j = 0; j < count; j++)
+	//	{
+
+	//		cout << vector_array[0][i][j] << "  ";
+	//	}
+	//	cout << endl;
+	//}
+	//cout << vector_array[1].size() << endl;
+}
+void Comb(int index, int begin, int len, int nm, int *A, int *C, vector <vector<int> >vector_array[2])
+{                                // index表示某个组合中的索引，begin表示从数组A中begin位置开始寻找，
+//  len表示数组A长度，n表示组合中个数，A表示原数组，C表示组合数组
+
+	if (index == nm)
+	{
+		vector<int>v_array;
+		for (int i = 0; i < nm; i++)
+		{
+			//cout << C[i] << " ";
+			v_array.push_back(C[i]);
+
+		}
+		vector_array[1].push_back(v_array);
+		//cout << vector_array[0].size() << endl;
+		//cout << endl;
+
+		return;
+	}
+	for (int j = begin; j <= len - nm + index; j++)
+	{
+		C[index] = A[j];
+		Comb(index + 1, j + 1, len, nm, A, C, vector_array);
+	}
+}
+void Initialization(int Matrix_A[4][4][N])
+{
+	for (int i = 0; i < dim; i++)
+	{
+		Matrix_A[i][i][0] = 1;
+	}
 }
 int MDS(int Matrix_A[4][4][N])
 {
@@ -534,129 +912,360 @@ int MDS(int Matrix_A[4][4][N])
 			}
 			else { return 0; }
 		}
-		return  1;
+
+	}
+	return  1;
+}
+int Integer_power(int num)
+{
+	int s = 1;
+	for (int i = 0; i < num; i++)
+	{
+		s = s * 2;
+	}
+	return s;
+}
+void copyer(int Matrix[4][4][N], int alpha, int copy_number, int Register_Matrix[12][4][N])
+{
+	int temp1[4][N] = { 0 };
+	int temp[N] = { Integer_power(alpha) };
+	//Printfmatrix(Matrix);
+	for (int i = 0; i < 4; i++)
+	{
+		multoper(temp, Register_Matrix[copy_type[copy_number][2]][i], temp1[i]);
+		addoper(Matrix[copy_type[copy_number][1]][i], temp1[i], Matrix[copy_type[copy_number][1]][i]);
+	}
+
+
+
+
+
+
+}
+void diager(int Matrix[4][4][N], int alpha[4])
+{
+	int temp[4][N] = { {Integer_power(alpha[0])},{Integer_power(alpha[1])},{Integer_power(alpha[2])},{Integer_power(alpha[3])} };
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			multoper(temp[i], Matrix[i][j], Matrix[i][j]);
+		}
+	}
+	//MP(Matrix);
+}
+void multoper(int alpha_1[N], int alpha_2[N], int alpha_3[N])
+{
+
+	int t1 = 0;
+	int t2 = 0;
+	for (int i = 0; i < N; i++)
+	{
+		if (alpha_1[i] > 0)
+		{
+			t1 = t1 + 1;
+		}
+		if (alpha_2[i] > 0)
+		{
+			t2 = t2 + 1;
+		}
+	}
+	int d[N] = { 0 };
+	int temp[N] = { 0 };
+	int t = 0;
+	for (int i = 0; i < t1; i++)
+	{
+		for (int j = 0; j < t2; j++)
+		{
+			t = alpha_1[i] | alpha_2[j];
+			d[t] = d[t] ^ 1;
+
+		}
+	}
+
+	t = 0;
+	for (int i = N; i >= 0; i--)
+	{
+		if (d[i] == 1)
+		{
+
+			temp[t] = i;
+			t = t + 1;
+
+		}
+	}
+
+	for (int i = 0; i < N; i++)
+	{
+		alpha_3[i] = temp[i];
+	}
+}
+void addoper(int alpha_1[N], int alpha_2[N], int alpha_3[N])
+{
+
+	int c[N] = { 0 };
+	int t1 = 0;
+	int t2 = 0;
+	int t = 0;
+	for (int i = 0; i < N; i++)
+	{
+		if (alpha_1[t1] > alpha_2[t2])
+		{
+			c[t] = alpha_1[t1];
+			t1 = t1 + 1;
+			t = t + 1;
+		}
+		else if (alpha_1[t1] < alpha_2[t2])
+		{
+			c[t] = alpha_2[t2];
+			t2 = t2 + 1;
+			t = t + 1;
+		}
+		else {
+			t1 = t1 + 1;
+			t2 = t2 + 1;
+		}
+
+
+	}
+	for (int i = 0; i < N; i++)
+	{
+		alpha_3[i] = c[i];
 	}
 
 }
-void MP(int A[4][4][N])
+void Printfmatrix(int  Matrix_A[4][4][N])
 {
 	for (int i = 0; i < 4; i++)
 	{
 		for (int j = 0; j < 4; j++)
 		{
-
 			for (int k = 0; k < N; k++)
 			{
-				if (A[i][j][k] == 0)break;
-				printf("%2d", A[i][j][k]);
+				if (Matrix_A[i][j][k] == 0)
+				{
+					cout << Matrix_A[i][j][k] << " ";
+					break;
+				}
+				cout << Matrix_A[i][j][k] << " ";
 			}
-			printf(";");
+			cout << ",";
 		}
-		printf("\n");
+		cout << endl;
+
 	}
-	printf("\n");
+
 }
-void copyshuzu(int path[opera_num], int location[X], int b1[opera_num])
+
+void equal(int  Matrix_A[M][4][4], int count)
 {
-	int Temp_Matrix[4][4][N] = { 0 }, Alpha_Matrix[20][4][N] = { 0 }, Register_Matrix[20][4][N] = { 0 };
-	Alpha_Matrix[0][0][0] = Register_Matrix[0][0][0] = Temp_Matrix[0][0][0] = 1;
-	Alpha_Matrix[1][1][0] = Register_Matrix[1][1][0] = Temp_Matrix[1][1][0] = 1;
-	Alpha_Matrix[2][2][0] = Register_Matrix[2][2][0] = Temp_Matrix[2][2][0] = 1;
-	Alpha_Matrix[3][3][0] = Register_Matrix[3][3][0] = Temp_Matrix[3][3][0] = 1;
-	int diag[opera_num][4] = {}, coffcopy[opera_num] = {}, num = 1, ww = 0, r = 4;
-	int wh[opera_num] = { 0 };
+	int temp_array[M] = { 0 };
+	int a = 1;
+	for (int i = 0; i < count; i++)
+	{
+		if (temp_array[i] == 0)
+		{
+			temp_array[i] = a;
+			for (int j = i + 1; j < count; j++)
+			{
+
+				if (equal_two_matrix(Matrix_A[i], Matrix_A[j]) == 1)
+				{
+					temp_array[j] = a;
+				}
+
+			}
+			a++;
+		}
+	}
+	//for (int i = 0; i < count; i++)
+	//{
+	//	cout << temp_array[i] << ",";
+	//}
+	cout << endl;
+	cout << a - 1 << endl;
+
+	for (int k = 1; k < a; k++)
+	{
+		for (int s = 0; s < count; s++)
+		{
+			if (temp_array[s] == k)
+			{
+				for (int i = 0; i < 4; i++)
+				{
+					for (int j = 0; j < 4; j++)
+					{
+						cout << Matrix_A[s][i][j] << ", ";
+					}
+
+				}
+				cout << endl;
+				break;
+			}
+		}
+	}
+
+
+
+}
+int equal_two_row_matrix(int matrix_a[4][4], int matrix_b[4][4])
+{
+
+	int temp1[4] = { 0,1,2,3 };
+	for (int s = 0; s < 24; s++)
+	{
+		int count = 0;
+
+		for (int i = 0; i < 4; i++)
+		{
+			for (int j = 0; j < 4; j++)
+			{
+				if (matrix_a[i][j] == matrix_b[temp1[i]][j])
+				{
+					count++;
+				}
+			}
+
+		}
+
+		if (count == 16)
+		{
+			return 1;
+		}
+		next_permutation(temp1, temp1 + 4);
+
+
+
+
+
+	}
+
+
+
+
+
+	return 0;
+}
+int equal_two_matrix(int matrix_a[4][4], int matrix_b[4][4])
+{
+	int temp1[4] = { 0,1,2,3 };
+	int count = 0;
+	//cout << endl;
+	for (int i = 0; i < 24; i++)
+	{
+
+		int temp_matrix[4][4] = { 0 };
+
+
+		for (int j = 0; j < 4; j++)
+		{
+			for (int k = 0; k < 4; k++)
+			{
+				temp_matrix[j][k] = matrix_b[j][temp1[k]];
+				//cout << temp_matrix[j][k] << " ,";
+
+			}
+		}
+
+		//cout << temp1[0] << " " << temp1[1] << " " << temp1[2] << " " << temp1[3] << endl;
+
+		next_permutation(temp1, temp1 + 4);
+		count = count + equal_two_row_matrix(matrix_a, temp_matrix);
+
+
+	}
+
+
+
+	if (count == 0)
+	{
+		return 0;
+	}
+
+
+
+	return 1;
+}
+
+
+
+
+
+
+
+
+
+void equal_element(int  Matrix_A[M][4][4][N], int count)
+{
+	int temp_array[M] = { 0 };
+	int a = 1;
+	for (int i = 0; i < count; i++)
+	{
+		if (temp_array[i] == 0)
+		{
+			temp_array[i] = a;
+			for (int j = i + 1; j < count; j++)
+			{
+
+				if (equal_two_matrix_element(Matrix_A[i], Matrix_A[j]) == 1)
+				{
+					temp_array[j] = a;
+				}
+
+			}
+			a++;
+		}
+	}
+	/*for (int i = 0; i < count; i++)
+	{
+		cout << temp_array[i] << ",";
+	}
+	cout << a << endl;*/
+
+	//for (int k = 1; k < a; k++)
+	//{
+	//	for (int s = 0; s < count; s++)
+	//	{
+	//		if (temp_array[s] == k)
+	//		{
+	//			for (int i = 0; i < 4; i++)
+	//			{
+	//				for (int j = 0; j < 4; j++)
+	//				{
+	//					cout << Matrix_A[s][i][j] << ", ";
+	//				}
+
+	//			}
+	//			cout << endl;
+	//			break;
+	//		}
+	//	}
+	//}
+
+
+
+}
+
+int equal_two_matrix_element(int matrix_a[4][4][N], int matrix_b[4][4][N])
+{
+	int count = 0;
+
 	for (int i = 0; i < 4; i++)
 	{
-		Alpha_Matrix[i][i][0] = Register_Matrix[i][i][0] = Temp_Matrix[i][i][0] = 1;
-	}
-	for (int i = 0; i < opera_num; i++)
-	{
-		coffcopy[i] = 1;
 		for (int j = 0; j < 4; j++)
 		{
-			diag[i][j] = 1;
-		}
-	}
-	for (int i = 0; i < X; i++)
-	{
-		if (location[i] % 5 == 0)
-		{
-			coffcopy[location[i] / 5] = Integer_power(num);
-			num++;
-		}
-		else
-		{
-			int di = location[i] / 5;//D_i
-			int dj = location[i] % 5 - 1;//D_i^j
-			diag[di][dj] = Integer_power(num);
-			num++;
-		}
-	}
-	for (int i = 0; i < opera_num; i++)
-	{
-		copyer(Temp_Matrix, coffcopy[i], path[i], 0, Register_Matrix, Alpha_Matrix);
-		for (int j = 0; j < 4; j++)
-		{
-			for (int k = 0; k < N; k++)
+			int temp[N] = { 0 };
+			addoper(matrix_a[i][j], matrix_b[i][j], temp);
+			if (temp[0] == 0)
 			{
-				Alpha_Matrix[r][j][k] = Register_Matrix[r][j][k] = Temp_Matrix[copy_type[path[i]][1]][j][k];
-			}
-		}
-		r++;
-		for (int d = 0; d < 4; d++)
-		{
-			if (diag[i][d] > 1)
-			{
-				int r1 = 0;
-				for (int z1 = 0; z1 < r; z1++)
-				{
-					int t1 = 0;
-					for (int z2 = 0; z2 < 4; z2++)
-					{
-						int t2 = 0;
-						for (int k = 0; k < N; k++)
-						{
-							if (Temp_Matrix[d][z2][k] == Register_Matrix[z1][z2][k])
-							{
-								t2++;
-							}
-						}
-						if (t2 < N) break;
-						else
-						{
-							t1++;
-						}
-					}
-					if (t1 == 4)
-					{
-						wh[ww] = r1 = z1;
-						ww++;
-						break;
-					}
-				}
-				diager(Temp_Matrix, diag[i][d], d);
-				for (int j = 0; j < 4; j++)
-				{
-					for (int k = 0; k < N; k++)
-					{
-						Alpha_Matrix[r1][j][k] = Temp_Matrix[d][j][k];
-					}
-				}
+				count++;
 			}
 		}
 
 	}
-	for (int i = 0; i < opera_num; i++)
+	if (count == 16)
 	{
-		for (int j = 0; j < ww; j++)
-		{
-			if (copy_type[path[i]][2] == wh[j])
-			{
-				b1[i] = 2;
-			}
-		}
+		return 1;
 	}
+	else { return 0; }
 }
-
-
-
